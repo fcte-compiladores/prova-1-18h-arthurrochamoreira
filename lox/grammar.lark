@@ -1,0 +1,64 @@
+start: stmt*
+
+?stmt: while_cmd
+     | print_cmd
+     | block
+     | assign ";"
+     | expr ";"
+
+assign: VAR "=" expr
+
+while_cmd: "while" "(" expr ")" stmt
+block: "{" stmt* "}"
+print_cmd: "print" expr ";"
+
+// EXPRESSÕES
+?expr: equality
+
+?equality: equality "==" comparison   -> eq
+         | equality "!=" comparison   -> ne
+         | comparison
+
+?comparison: comparison ">" term      -> gt
+           | comparison "<" term      -> lt
+           | comparison ">=" term     -> ge
+           | comparison "<=" term     -> le
+           | term
+
+?term: term "+" factor                -> add
+     | term "-" factor                -> sub
+     | factor
+
+?factor: factor "*" unary             -> mul
+       | factor "/" unary             -> div
+       | unary
+
+?unary: "!" unary                     -> not_
+      | "-" unary                     -> neg
+      | call
+
+?call: primary
+     | call "(" [params] ")"         -> call
+
+params: expr ("," expr)*
+
+?primary: NUMBER
+        | STRING
+        | BOOL
+        | NIL
+        | VAR
+        | "(" expr ")"
+        | list
+
+// Literal de lista
+list: "[" [ expr ("," expr)* [","] ] "]"
+
+CLASS    : /[A-Z]\w*/
+VAR      : /[a-z_]\w*/
+NUMBER   : /([1-9][0-9]*|0)(\.[0-9]+)?/
+STRING   : /"[^"\n]*"/
+BOOL     : "true" | "false"
+NIL      : "nil"
+COMMENT  : "//" /[^\n]*/
+
+%ignore /\s/ | COMMENT
